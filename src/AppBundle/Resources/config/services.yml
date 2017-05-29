@@ -1,0 +1,5 @@
+services:
+    app.client.monitoring_resource:
+        class: AppBundle\Service\Client\MonitoringResourceClient
+        arguments:
+            - "@guzzle.client.monitoring_resource"
