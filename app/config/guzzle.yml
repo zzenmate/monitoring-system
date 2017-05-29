@@ -1,0 +1,6 @@
+guzzle:
+    clients:
+        monitoring_resource:
+            base_url: "%monitoring_resource%"
+            options:
+                timeout: 10
