@@ -78,13 +78,7 @@ class MonitoringResourceCommand extends ContainerAwareCommand
                     if ($page instanceof Page) {
                         $page->setScannedAt(new \DateTime());
 
-                        $hash = $this->generateHashContent($content.'12121212');
-                        $hash1 = $this->generateHashContent($content.'lol1212_ili_kek1');
-                        $hash2 = $this->generateHashContent($content.'lol1212_ili_k1212ek2');
-                        echo $hash.PHP_EOL;
-                        echo $hash1.PHP_EOL;
-                        echo $hash2.PHP_EOL;
-                        echo $page->getHash();
+                        $hash = $this->generateHashContent($content);
                         if ($hash != $page->getHash()) {
                             $page->setContent($content.'some_kek')
                                  ->setHash($hash);
