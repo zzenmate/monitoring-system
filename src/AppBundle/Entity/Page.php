@@ -94,6 +94,15 @@ class Page
     protected $version;
 
     /**
+     * @var string $hash Hash
+     *
+     * @ORM\Column(type="string", length=50, nullable=false)
+     *
+     * @Assert\NotBlank()
+     */
+    protected $hash;
+
+    /**
      * Get ID
      *
      * @return int ID
@@ -243,6 +252,30 @@ class Page
     public function setVersion($version)
     {
         $this->version = $version;
+
+        return $this;
+    }
+
+    /**
+     * Get hash
+     *
+     * @return string Hash
+     */
+    public function getHash()
+    {
+        return $this->hash;
+    }
+
+    /**
+     * Set hash
+     *
+     * @param string $hash
+     *
+     * @return $this
+     */
+    public function setHash($hash)
+    {
+        $this->hash = $hash;
 
         return $this;
     }

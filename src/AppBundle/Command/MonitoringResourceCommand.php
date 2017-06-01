@@ -9,7 +9,6 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DomCrawler\Crawler;
-use Symfony\Component\HttpFoundation\Response;
 
 class MonitoringResourceCommand extends ContainerAwareCommand
 {
@@ -60,11 +59,6 @@ class MonitoringResourceCommand extends ContainerAwareCommand
                 $url = $document->getAttribute('href');
                 echo $url.PHP_EOL;
                 if (!empty($url) && strpos($url, '.html') !== false) { // check if link to content page
-                    $page = $pageRepository->getPageByURL($url);
-                    if ($page instanceof Page) {
-                        continue;
-                    }
-
                     try {
                         $pageResponse = $monitoringResourceClient->get($url);
                     } catch (MonitoringResourceBadResponseException $e) {
@@ -73,17 +67,33 @@ class MonitoringResourceCommand extends ContainerAwareCommand
                         return;
                     }
 
-                    if ($pageResponse->getStatusCode() == Response::HTTP_OK) {
-                        $pageResponseContent = $pageResponse->getBody()->getContents();
-                        $pageCrawler = new Crawler($pageResponseContent);
+                    $pageResponseContent = $pageResponse->getBody()->getContents();
+                    $pageCrawler = new Crawler($pageResponseContent);
 
-                        $content = $this->getMainContentFromDocument(
-                            $pageCrawler->filter('.otstupVertVneshn .bg1-content')->html()
-                        );
+                    $content = $this->getMainContentFromDocument(
+                        $pageCrawler->filter('.otstupVertVneshn .bg1-content')->html()
+                    );
 
+                    $page = $pageRepository->getPageByURL($url);
+                    if ($page instanceof Page) {
+                        $page->setScannedAt(new \DateTime());
+
+                        $hash = $this->generateHashContent($content.'12121212');
+                        $hash1 = $this->generateHashContent($content.'lol1212_ili_kek1');
+                        $hash2 = $this->generateHashContent($content.'lol1212_ili_k1212ek2');
+                        echo $hash.PHP_EOL;
+                        echo $hash1.PHP_EOL;
+                        echo $hash2.PHP_EOL;
+                        echo $page->getHash();
+                        if ($hash != $page->getHash()) {
+                            $page->setContent($content.'some_kek')
+                                 ->setHash($hash);
+                        }
+                    } else {
                         $page = (new Page())
                             ->setTitle($document->nodeValue)
                             ->setContent($content)
+                            ->setHash($this->generateHashContent($content))
                             ->setUrl($url)
                             ->setScannedAt(new \DateTime());
 
@@ -108,5 +118,17 @@ class MonitoringResourceCommand extends ContainerAwareCommand
         $startPositionBlockWithLinkInFooter = strpos($content, '<div class="col-xs-4 col-sm-4');
 
         return substr($content, $startPositionH1, $startPositionBlockWithLinkInFooter - $startPositionH1);
+    }
+
+    /**
+     * Generate hash content
+     *
+     * @param string $content Content
+     *
+     * @return string
+     */
+    protected function generateHashContent($content)
+    {
+        return hash('md5', $content);
     }
 }
