@@ -3,6 +3,7 @@
 namespace AppBundle\Command;
 
 use AppBundle\Entity\Page;
+use AppBundle\Exception\MonitoringResourceBadResponseException;
 use AppBundle\Repository\PageRepository;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,6 +15,7 @@ class MonitoringResourceCommand extends ContainerAwareCommand
 {
     const POSITION_VERSION_PRINT_IN_DOM = 0;
     const COUNT_DOCUMENT_PER_PAGE = 10;
+    const COUNT_DOCUMENT_PER_FAST_SCAN = 100;
 
     /**
      * {@inheritdoc}
@@ -35,64 +37,76 @@ class MonitoringResourceCommand extends ContainerAwareCommand
         $pageRepository = $em->getRepository('AppBundle:Page');
         $monitoringResourceClient = $this->getContainer()->get('app.client.monitoring_resource');
 
-        $listResponse = $monitoringResourceClient->get('');
-        //         if($res->getStatusCode() == Response::HTTP_OK) {
+        for ($i = 0; $i < self::COUNT_DOCUMENT_PER_FAST_SCAN / self::COUNT_DOCUMENT_PER_PAGE; $i++) {
+            try {
+                $listResponse = $monitoringResourceClient->get('', [
+                    'query' => [
+                        'start' => self::COUNT_DOCUMENT_PER_PAGE * $i,
+                    ],
+                ]);
+            } catch (MonitoringResourceBadResponseException $e) {
+                $output->writeln($e->getMessage());
 
-        $listResponseContent = $listResponse->getBody()->getContents();
+                return;
+            }
 
-        $listCrawler = new Crawler($listResponseContent);
-        $listDocuments = $listCrawler->filter('.otstupVertVneshn .bg1-content a');
-        /** @var \DOMElement $document */
-        foreach ($listDocuments as $document) {
-            $url = $document->getAttribute('href');
-            if (!empty($url)) {
-                $page = $pageRepository->getPageByURL($url);
-                if (!$page instanceof Page) {
-                    $pageResponse = $monitoringResourceClient->get($url);
+            $listResponseContent = $listResponse->getBody()->getContents();
+
+            $listCrawler = new Crawler($listResponseContent);
+
+            $listDocuments = $listCrawler->filter('.otstupVertVneshn .bg1-content a')->slice(0, 10);
+            /** @var \DOMElement $document */
+            foreach ($listDocuments as $document) {
+                $url = $document->getAttribute('href');
+                echo $url.PHP_EOL;
+                if (!empty($url) && strpos($url, '.html') !== false) { // check if link to content page
+                    $page = $pageRepository->getPageByURL($url);
+                    if ($page instanceof Page) {
+                        continue;
+                    }
+
+                    try {
+                        $pageResponse = $monitoringResourceClient->get($url);
+                    } catch (MonitoringResourceBadResponseException $e) {
+                        $output->writeln($e->getMessage());
+
+                        return;
+                    }
+
                     if ($pageResponse->getStatusCode() == Response::HTTP_OK) {
                         $pageResponseContent = $pageResponse->getBody()->getContents();
                         $pageCrawler = new Crawler($pageResponseContent);
 
-                        $aad = $pageCrawler->filter('.otstupVertVneshn .bg1-content')->html();
+                        $content = $this->getMainContentFromDocument(
+                            $pageCrawler->filter('.otstupVertVneshn .bg1-content')->html()
+                        );
 
-                        $pageDomElements = $pageCrawler->filter('.otstupVertVneshn .bg1-content')->children();
-                        $asd = $pageDomElements->html();
-                        $pageDomElements = $this->removeLinkFromPageDomElements($pageDomElements);
+                        $page = (new Page())
+                            ->setTitle($document->nodeValue)
+                            ->setContent($content)
+                            ->setUrl($url)
+                            ->setScannedAt(new \DateTime());
 
-                        $pageHtmlContent = $pageDomElements->html();
+                        $em->persist($page);
                     }
-
-                    $b = 1;
                 }
             }
+            $em->flush();
         }
-
-        echo 'kek';
     }
 
     /**
-     * Remove link from page dom elements
+     * Get main content from document
      *
-     * @param Crawler $pageDomElements Page DOM elements
+     * @param string $content Content
      *
-     * @return Crawler
+     * @return string
      */
-    protected function removeLinkFromPageDomElements(Crawler $pageDomElements)
+    protected function getMainContentFromDocument($content)
     {
-        $a = $pageDomElements->count();
+        $startPositionH1 = strpos($content, '<h1>');
+        $startPositionBlockWithLinkInFooter = strpos($content, '<div class="col-xs-4 col-sm-4');
 
-        return $pageDomElements->slice(self::POSITION_VERSION_PRINT_IN_DOM, $this->getPositionVersionForAllInDom($pageDomElements));
-    }
-
-    /**
-     * Get position version for all in dom
-     *
-     * @param Crawler $pageDomElements Page DOM elements
-     *
-     * @return int
-     */
-    protected function getPositionVersionForAllInDom(Crawler $pageDomElements)
-    {
-        return $pageDomElements->count() - 1;
+        return substr($content, $startPositionH1, $startPositionBlockWithLinkInFooter - $startPositionH1);
     }
 }
