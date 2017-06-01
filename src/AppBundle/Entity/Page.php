@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Fresh\DoctrineEnumBundle\Validator\Constraints as DoctrineAssert;
 use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
@@ -15,6 +16,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @ORM\Table(name="pages")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\PageRepository")
+ *
+ * @UniqueEntity("url")
  *
  * @Gedmo\Loggable(logEntryClass="AppBundle\Entity\Log")
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
@@ -57,7 +60,7 @@ class Page
     /**
      * @var string $url Url
      *
-     * @ORM\Column(type="string", length=255, nullable=false)
+     * @ORM\Column(type="string", length=255, nullable=false, unique=true)
      *
      * @Assert\NotBlank()
      * @Assert\Length(min="2", max="255")
