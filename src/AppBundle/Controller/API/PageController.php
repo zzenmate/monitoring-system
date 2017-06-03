@@ -3,6 +3,7 @@
 namespace AppBundle\Controller\API;
 
 use AppBundle\Entity\Page;
+use FOS\RestBundle\Controller\Annotations\View;
 use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcherInterface;
@@ -10,12 +11,12 @@ use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Resource Controller
+ * Page Controller
  *
- * @Rest\NamePrefix("api_resource_")
- * @Rest\Prefix("/v1/resources")
+ * @Rest\NamePrefix("api_page_")
+ * @Rest\Prefix("/v1/pages")
  */
-class ResourceController extends FOSRestController
+class PageController extends FOSRestController
 {
     use ControllerHelperTrait;
 
@@ -24,7 +25,7 @@ class ResourceController extends FOSRestController
      *
      * @ApiDoc(
      *     description="Список всіх публікацій",
-     *     section="Session",
+     *     section="Page",
      *     statusCodes={
      *          200="Returned when successful",
      *          500="Returned when internal error on the server occurred"
@@ -40,6 +41,8 @@ class ResourceController extends FOSRestController
      * @Rest\QueryParam(name="type", nullable=true, description="Фільтр по типу публцікації. Можливі типу: new_page - сторінка не змінювалась, changed_page - сторінка змінювалась, deleted_page - сторінка видалена")
      *
      * @Rest\Get("")
+     *
+     * @View(serializerGroups="page")
      */
     public function getListAction(ParamFetcherInterface $paramFetcher)
     {
@@ -55,6 +58,47 @@ class ResourceController extends FOSRestController
                     '_offset' => (int) $filters['_offset'],
                 ],
                 'pages' => $pages,
+            ]);
+        } catch (\Exception $e) {
+            throw $this->createInternalServerErrorException();
+        }
+
+        return $this->handleView($view);
+    }
+
+    /**
+     * Повертає публікацію
+     *
+     * @param Page $page $page
+     *
+     * @return Response
+     *
+     * @ApiDoc(
+     *     description="Повертає публікацію",
+     *     requirements={
+     *          {"name"="id", "dataType"="integer", "requirement"="\w+", "description"="ID of page"}
+     *      },
+     *     section="Page",
+     *     output={
+     *          "class"="AppBundle\Entity\Page",
+     *           "groups"={"page"}
+     *     },
+     *     statusCodes={
+     *          200="Returned when successful",
+     *          404="Returned when page not found",
+     *          500="Returned when internal error on the server occurred"
+     *      }
+     * )
+     *
+     * @Rest\Get("/{id}")
+     *
+     * @View(serializerGroups="page")
+     */
+    public function getAction(Page $page)
+    {
+        try {
+            $view = $this->createViewForHttpOkResponse([
+                'page' => $page,
             ]);
         } catch (\Exception $e) {
             throw $this->createInternalServerErrorException();

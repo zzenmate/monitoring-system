@@ -37,6 +37,7 @@ class Page
      * @ORM\GeneratedValue(strategy="AUTO")
      *
      * @JMS\Expose
+     * @JMS\Groups({"page"})
      */
     protected $id;
 
@@ -49,6 +50,7 @@ class Page
      * @Assert\Type(type="string")
      *
      * @JMS\Expose
+     * @JMS\Groups({"page"})
      */
     protected $title;
 
@@ -63,6 +65,7 @@ class Page
      * @Gedmo\Versioned
      *
      * @JMS\Expose
+     * @JMS\Groups({"page"})
      */
     protected $content;
 
@@ -76,10 +79,13 @@ class Page
      * @Assert\Type(type="string")
      *
      * @JMS\Expose
+     * @JMS\Groups({"page"})
      */
     protected $url;
 
     /**
+     * Останній час сканування публікації
+     *
      * @var \DateTime $scannedAt Scanned At
      *
      * @ORM\Column(type="datetime", nullable=true)
@@ -87,6 +93,7 @@ class Page
      * @Assert\Type(type="datetime")
      *
      * @JMS\Expose
+     * @JMS\Groups({"page"})
      */
     protected $scannedAt;
 
@@ -97,16 +104,20 @@ class Page
      * @DoctrineAssert\Enum(entity="AppBundle\DBAL\Types\PageStatusType")
      *
      * @JMS\Expose
+     * @JMS\Groups({"page"})
      */
     protected $status = PageStatusType::NEW_PAGE;
 
     /**
+     * Повертає кількість оновлень публікації
+     *
      * @var int $version Version
      *
      * @ORM\Column(type="integer")
      * @ORM\Version
      *
      * @JMS\Expose
+     * @JMS\Groups({"page"})
      */
     protected $version;
 
