@@ -11,7 +11,6 @@ use Symfony\Component\DomCrawler\Crawler;
 
 class MonitoringResourceCommand extends ContainerAwareCommand
 {
-    const POSITION_VERSION_PRINT_IN_DOM = 0;
     const COUNT_DOCUMENT_PER_PAGE = 10;
     const COUNT_DOCUMENT_PER_FAST_SCAN = 100;
     const COUNT_DOCUMENT_ELEMENT_IN_EMPTY_PAGE = 2;

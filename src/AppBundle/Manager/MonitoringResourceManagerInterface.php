@@ -17,6 +17,13 @@ interface MonitoringResourceManagerInterface
     public function save(Page $page);
 
     /**
+     * Update page
+     *
+     * @param Page $page Page
+     */
+    public function update(Page $page);
+
+    /**
      * Get page by URL
      *
      * @param string $url URL

@@ -58,7 +58,7 @@ class MonitoringResourceService
                  ->setHash($content);
         }
 
-        $this->monitoringResourceManager->save($page);
+        $this->monitoringResourceManager->update($page);
     }
 
     /**

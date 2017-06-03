@@ -42,7 +42,20 @@ class MonitoringResourceManager implements MonitoringResourceManagerInterface
     public function save(Page $page)
     {
         try {
-            $this->em->flush($page);
+            $this->em->persist($page);
+            $this->em->flush();
+        } catch (OptimisticLockException $e) {
+            $this->logger->addError(sprintf("OptimisticLockException for ID: %s, message:\"%s\"", $page->getID(), $e->getMessage()));
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function update(Page $page)
+    {
+        try {
+            $this->em->flush();
         } catch (OptimisticLockException $e) {
             $this->logger->addError(sprintf("OptimisticLockException for ID: %s, message:\"%s\"", $page->getID(), $e->getMessage()));
         }
