@@ -2,7 +2,9 @@
 
 namespace AppBundle\Controller\API;
 
+use AppBundle\Entity\Log;
 use AppBundle\Entity\Page;
+use AppBundle\Repository\LogRepository;
 use FOS\RestBundle\Controller\Annotations\View;
 use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
@@ -99,6 +101,51 @@ class PageController extends FOSRestController
         try {
             $view = $this->createViewForHttpOkResponse([
                 'page' => $page,
+            ]);
+        } catch (\Exception $e) {
+            throw $this->createInternalServerErrorException();
+        }
+
+        return $this->handleView($view);
+    }
+
+    /**
+     * Повертає версії публікацій
+     *
+     * ### logged_at - дати, коли була зміна контенту.
+     * ### version - номер версії публікації.###
+     * ### data - текст публікації
+     *
+     * @param Page $page $page
+     *
+     * @return Response
+     *
+     * @ApiDoc(
+     *     description="Повертає версії публікацій",
+     *     requirements={
+     *          {"name"="id", "dataType"="integer", "requirement"="\w+", "description"="ID of page"}
+     *      },
+     *     section="Page",
+     *     output={
+     *          "class"="AppBundle\Entity\Log",
+     *     },
+     *     statusCodes={
+     *          200="Returned when successful",
+     *          404="Returned when page not found",
+     *          500="Returned when internal error on the server occurred"
+     *      }
+     * )
+     *
+     * @Rest\Get("/{id}/revision")
+     */
+    public function revisionAction(Page $page)
+    {
+        try {
+            $logRepository = $this->getDoctrine()->getRepository(Log::class);
+            $logs = $logRepository->findRevisionsByPage($page);
+
+            $view = $this->createViewForHttpOkResponse([
+                'logs' => $logs,
             ]);
         } catch (\Exception $e) {
             throw $this->createInternalServerErrorException();
