@@ -14,6 +14,7 @@ class MonitoringResourceCommand extends ContainerAwareCommand
     const POSITION_VERSION_PRINT_IN_DOM = 0;
     const COUNT_DOCUMENT_PER_PAGE = 10;
     const COUNT_DOCUMENT_PER_FAST_SCAN = 100;
+    const COUNT_DOCUMENT_ELEMENT_IN_EMPTY_PAGE = 2;
 
     /**
      * {@inheritdoc}
@@ -51,7 +52,12 @@ class MonitoringResourceCommand extends ContainerAwareCommand
 
             $listCrawler = new Crawler($listResponseContent);
 
-            $listDocuments = $listCrawler->filter('.otstupVertVneshn .bg1-content a')->slice(0, 10);
+            $countDocuments = $listCrawler->count() >= 10 ? 10 : $listCrawler->count();
+            // Check if page empty on documents
+            if ($countDocuments <= self::COUNT_DOCUMENT_ELEMENT_IN_EMPTY_PAGE) {
+                return;
+            }
+            $listDocuments = $listCrawler->filter('.otstupVertVneshn .bg1-content a')->slice(0, $countDocuments);
             /** @var \DOMElement $document */
             foreach ($listDocuments as $document) {
                 $url = $document->getAttribute('href');
