@@ -82,3 +82,15 @@ stof_doctrine_extensions:
 
 monolog:
     channels: ['manager']
+
+nelmio_api_doc: ~
+
+fos_rest:
+    routing_loader:
+        default_format: json
+    param_fetcher_listener: true
+    body_listener: true
+    body_converter:
+        enabled: true
+    view:
+        view_response_listener: force
