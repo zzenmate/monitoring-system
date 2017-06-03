@@ -52,12 +52,14 @@ class MonitoringResourceCommand extends ContainerAwareCommand
 
             $listCrawler = new Crawler($listResponseContent);
 
-            $countDocuments = $listCrawler->count() >= 10 ? 10 : $listCrawler->count();
-            // Check if page empty on documents
+            $listDocumentLinks = $listCrawler->filter('.otstupVertVneshn .bg1-content a');
+            $countDocuments = $listDocumentLinks->count() > 10 ? self::COUNT_DOCUMENT_PER_PAGE : $listDocumentLinks->count();
+
             if ($countDocuments <= self::COUNT_DOCUMENT_ELEMENT_IN_EMPTY_PAGE) {
                 return;
             }
-            $listDocuments = $listCrawler->filter('.otstupVertVneshn .bg1-content a')->slice(0, $countDocuments);
+
+            $listDocuments = $listDocumentLinks->slice(0, self::COUNT_DOCUMENT_PER_PAGE);
             /** @var \DOMElement $document */
             foreach ($listDocuments as $document) {
                 $url = $document->getAttribute('href');
