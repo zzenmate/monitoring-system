@@ -32,9 +32,9 @@ class MonitoringResourceCommand extends ContainerAwareCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $em = $this->getContainer()->get('doctrine.orm.entity_manager');
-        /** @var PageRepository $pageRepository */
         $pageRepository = $em->getRepository('AppBundle:Page');
         $monitoringResourceClient = $this->getContainer()->get('app.client.monitoring_resource');
+        $monitoringResourceService = $this->getContainer()->get('app.monitroing_resource');
 
         for ($i = 0; $i < self::COUNT_DOCUMENT_PER_FAST_SCAN / self::COUNT_DOCUMENT_PER_PAGE; $i++) {
             try {
@@ -70,59 +70,25 @@ class MonitoringResourceCommand extends ContainerAwareCommand
                     $pageResponseContent = $pageResponse->getBody()->getContents();
                     $pageCrawler = new Crawler($pageResponseContent);
 
-                    $content = $this->getMainContentFromDocument(
+                    $content = $monitoringResourceService->getMainContentFromDocument(
                         $pageCrawler->filter('.otstupVertVneshn .bg1-content')->html()
                     );
 
                     $page = $pageRepository->getPageByURL($url);
+                    $title = $document->nodeValue;
                     if ($page instanceof Page) {
-                        $page->setScannedAt(new \DateTime());
-
-                        $hash = $this->generateHashContent($content);
-                        if ($hash != $page->getHash()) {
-                            $page->setContent($content.'some_kek')
-                                 ->setHash($hash);
+                        $hash = $monitoringResourceService->generateHashContent($content);
+                        if ($hash == $page->getHash()) {
+                            $monitoringResourceService->updatePage($page);
+                        } else {
+                            $monitoringResourceService->updatePage($page, $content, $hash);
                         }
                     } else {
-                        $page = (new Page())
-                            ->setTitle($document->nodeValue)
-                            ->setContent($content)
-                            ->setHash($this->generateHashContent($content))
-                            ->setUrl($url)
-                            ->setScannedAt(new \DateTime());
-
-                        $em->persist($page);
+                        $monitoringResourceService->savePage($title, $content, $url);
                     }
                 }
             }
             $em->flush();
         }
-    }
-
-    /**
-     * Get main content from document
-     *
-     * @param string $content Content
-     *
-     * @return string
-     */
-    protected function getMainContentFromDocument($content)
-    {
-        $startPositionH1 = strpos($content, '<h1>');
-        $startPositionBlockWithLinkInFooter = strpos($content, '<div class="col-xs-4 col-sm-4');
-
-        return substr($content, $startPositionH1, $startPositionBlockWithLinkInFooter - $startPositionH1);
-    }
-
-    /**
-     * Generate hash content
-     *
-     * @param string $content Content
-     *
-     * @return string
-     */
-    protected function generateHashContent($content)
-    {
-        return hash('md5', $content);
     }
 }
