@@ -3,4 +3,4 @@ guzzle:
         monitoring_resource:
             base_url: "%monitoring_resource%"
             options:
-                timeout: 10
+                timeout: 20

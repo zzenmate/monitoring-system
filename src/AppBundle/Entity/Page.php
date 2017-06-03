@@ -20,7 +20,6 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @UniqueEntity("url")
  *
  * @Gedmo\Loggable(logEntryClass="AppBundle\Entity\Log")
- * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
  */
 class Page
 {

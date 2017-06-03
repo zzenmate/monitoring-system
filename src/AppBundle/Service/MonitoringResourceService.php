@@ -43,13 +43,15 @@ class MonitoringResourceService
     }
 
     /**
-     * Update page
+     * Get Update page
      *
      * @param Page        $page    Page
      * @param string|null $content Content
      * @param string|null $hash    Hash
+     *
+     * @return $page
      */
-    public function updatePage(Page $page, $content = null, $hash = null)
+    public function getUpdatePage(Page $page, $content = null, $hash = null)
     {
         $page->setScannedAt(new \DateTime());
 
@@ -58,7 +60,24 @@ class MonitoringResourceService
                  ->setHash($content);
         }
 
-        $this->monitoringResourceManager->update($page);
+        return $page;
+    }
+
+    /**
+     * Remove not scanned pages
+     *
+     * @param int       $countScannedPages Count Scanned pages
+     * @param \DateTime $startScannedAt    Start scanned at
+     */
+    public function removeNotScannedPages($countScannedPages, $startScannedAt)
+    {
+        $pages = $this->monitoringResourceManager->getNotScannedPagesByPeriod($countScannedPages, $startScannedAt);
+
+        foreach ($pages as $page) {
+            $this->monitoringResourceManager->remove($page);
+        }
+
+        $this->monitoringResourceManager->flush();
     }
 
     /**

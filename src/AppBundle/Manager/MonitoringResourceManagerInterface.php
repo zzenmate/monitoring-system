@@ -17,11 +17,16 @@ interface MonitoringResourceManagerInterface
     public function save(Page $page);
 
     /**
-     * Update page
+     * Flush page
+     */
+    public function flush();
+
+    /**
+     * Remove page
      *
      * @param Page $page Page
      */
-    public function update(Page $page);
+    public function remove(Page $page);
 
     /**
      * Get page by URL
@@ -31,4 +36,14 @@ interface MonitoringResourceManagerInterface
      * @return Page|null
      */
     public function getPageByURL($url);
+
+    /**
+     * Get not scanned pages by period
+     *
+     * @param $countScannedPages
+     * @param $startScannedAt
+     *
+     * @return Page[]
+     */
+    public function getNotScannedPagesByPeriod($countScannedPages, $startScannedAt);
 }

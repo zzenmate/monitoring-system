@@ -30,6 +30,9 @@ class MonitoringResourceCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $countIteration = 0;
+        $startScannedAt = (new \DateTime());
+
         $monitoringResourceClient = $this->getContainer()->get('app.client.monitoring_resource');
         $monitoringResourceManager = $this->getContainer()->get('app.monitoring_resource.manager');
         $monitoringResourceService = $this->getContainer()->get('app.monitoring_resource');
@@ -55,12 +58,14 @@ class MonitoringResourceCommand extends ContainerAwareCommand
             $countDocuments = $listDocumentLinks->count() > 10 ? self::COUNT_DOCUMENT_PER_PAGE : $listDocumentLinks->count();
 
             if ($countDocuments <= self::COUNT_DOCUMENT_ELEMENT_IN_EMPTY_PAGE) {
-                return;
+                break;
             }
 
             $listDocuments = $listDocumentLinks->slice(0, self::COUNT_DOCUMENT_PER_PAGE);
             /** @var \DOMElement $document */
             foreach ($listDocuments as $document) {
+                $countIteration++;
+
                 $url = $document->getAttribute('href');
                 echo $url.PHP_EOL;
                 if (!empty($url) && strpos($url, '.html') !== false) { // check if link to content page
@@ -84,9 +89,9 @@ class MonitoringResourceCommand extends ContainerAwareCommand
                     if ($page instanceof Page) {
                         $hash = $monitoringResourceService->generateHashContent($content);
                         if ($hash == $page->getHash()) {
-                            $monitoringResourceService->updatePage($page);
+                            $monitoringResourceService->getUpdatePage($page);
                         } else {
-                            $monitoringResourceService->updatePage($page, $content, $hash);
+                            $monitoringResourceService->getUpdatePage($page, $content, $hash);
                         }
                     } else {
                         $monitoringResourceService->savePage($title, $content, $url);
@@ -94,5 +99,9 @@ class MonitoringResourceCommand extends ContainerAwareCommand
                 }
             }
         }
+
+        $monitoringResourceManager->flush();
+
+        $monitoringResourceService->removeNotScannedPages($countIteration, $startScannedAt);
     }
 }

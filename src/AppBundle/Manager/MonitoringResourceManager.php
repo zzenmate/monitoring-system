@@ -43,7 +43,6 @@ class MonitoringResourceManager implements MonitoringResourceManagerInterface
     {
         try {
             $this->em->persist($page);
-            $this->em->flush();
         } catch (OptimisticLockException $e) {
             $this->logger->addError(sprintf("OptimisticLockException for ID: %s, message:\"%s\"", $page->getID(), $e->getMessage()));
         }
@@ -52,10 +51,22 @@ class MonitoringResourceManager implements MonitoringResourceManagerInterface
     /**
      * @inheritdoc
      */
-    public function update(Page $page)
+    public function flush()
     {
         try {
             $this->em->flush();
+        } catch (OptimisticLockException $e) {
+            $this->logger->addError(sprintf("OptimisticLockException, message:\"%s\"", $e->getMessage()));
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function remove(Page $page)
+    {
+        try {
+            $this->em->remove($page);
         } catch (OptimisticLockException $e) {
             $this->logger->addError(sprintf("OptimisticLockException for ID: %s, message:\"%s\"", $page->getID(), $e->getMessage()));
         }
@@ -67,5 +78,13 @@ class MonitoringResourceManager implements MonitoringResourceManagerInterface
     public function getPageByURL($url)
     {
         return $this->pageRepository->getPageByURL($url);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getNotScannedPagesByPeriod($countScannedPages, $startScannedAt)
+    {
+        return $this->pageRepository->getNotScannedPagesByPeriod($countScannedPages, $startScannedAt);
     }
 }
