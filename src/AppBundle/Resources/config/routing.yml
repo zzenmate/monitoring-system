@@ -1,0 +1,3 @@
+api_resource:
+    resource: AppBundle\Controller\API\ResourceController
+    type: rest

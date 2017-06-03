@@ -9,9 +9,9 @@ use Fresh\DoctrineEnumBundle\DBAL\Types\AbstractEnumType;
  */
 final class PageStatusType extends AbstractEnumType
 {
-    const NEW_PAGE = 'NP';
-    const CHANGED_PAGE = 'GP';
-    const DELETED_PAGE = 'DP';
+    const NEW_PAGE = 'new_page';
+    const CHANGED_PAGE = 'changed_page';
+    const DELETED_PAGE = 'deleted_page';
 
     protected static $choices = [
         self::NEW_PAGE => 'New page',
