@@ -4,6 +4,11 @@ services:
         arguments:
             - "@guzzle.client.monitoring_resource"
 
+    app.matching:
+        class: AppBundle\Service\MatchingService
+        arguments:
+            - "@doctrine.orm.entity_manager"
+
     app.monitoring_resource:
         class: AppBundle\Service\MonitoringResourceService
         arguments:
