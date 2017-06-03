@@ -1,0 +1,6 @@
+services:
+    page.repository:
+        class: AppBundle\Repository\PageRepository
+        factory: [ "@doctrine", 'getRepository' ]
+        arguments:
+            - AppBundle\Entity\Page

@@ -1,0 +1,7 @@
+services:
+    app.monitoring_resource.manager:
+        class: AppBundle\Manager\MonitoringResourceManager
+        arguments:
+            - "@doctrine.orm.entity_manager"
+            - "@page.repository"
+            - "@monolog.logger"

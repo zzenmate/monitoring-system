@@ -4,7 +4,7 @@ services:
         arguments:
             - "@guzzle.client.monitoring_resource"
 
-    app.monitroing_resource:
+    app.monitoring_resource:
         class: AppBundle\Service\MonitoringResourceService
         arguments:
-            - "@doctrine.orm.entity_manager"
+            - "@app.monitoring_resource.manager"

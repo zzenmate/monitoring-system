@@ -79,3 +79,6 @@ stof_doctrine_extensions:
             timestampable: true
             loggable: true
             softdeleteable: true
+
+monolog:
+    channels: ['manager']

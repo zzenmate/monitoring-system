@@ -3,24 +3,24 @@
 namespace AppBundle\Service;
 
 use AppBundle\Entity\Page;
-use Doctrine\ORM\EntityManager;
+use AppBundle\Manager\MonitoringResourceManagerInterface;
 
 /**
  * Class MonitoringResourceService
  */
 class MonitoringResourceService
 {
-    /** @var EntityManager $em Entity manager */
-    protected $em;
+    /** @var MonitoringResourceManagerInterface $monitoringResourceManager Monitoring resource manager */
+    protected $monitoringResourceManager;
 
     /**
      * Constructor
      *
-     * @param EntityManager $em Entity manager
+     * @param MonitoringResourceManagerInterface $monitoringResourceManager Monitoring resource manager
      */
-    public function __construct(EntityManager $em)
+    public function __construct(MonitoringResourceManagerInterface $monitoringResourceManager)
     {
-        $this->em = $em;
+        $this->monitoringResourceManager = $monitoringResourceManager;
     }
 
     /**
@@ -39,8 +39,7 @@ class MonitoringResourceService
             ->setUrl($url)
             ->setScannedAt(new \DateTime());
 
-        $this->em->persist($page);
-        $this->em->flush();
+        $this->monitoringResourceManager->save($page);
     }
 
     /**
@@ -59,7 +58,7 @@ class MonitoringResourceService
                  ->setHash($content);
         }
 
-        $this->em->flush();
+        $this->monitoringResourceManager->save($page);
     }
 
     /**

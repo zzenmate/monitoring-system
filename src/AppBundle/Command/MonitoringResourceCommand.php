@@ -4,7 +4,6 @@ namespace AppBundle\Command;
 
 use AppBundle\Entity\Page;
 use AppBundle\Exception\MonitoringResourceBadResponseException;
-use AppBundle\Repository\PageRepository;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -31,10 +30,9 @@ class MonitoringResourceCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $em = $this->getContainer()->get('doctrine.orm.entity_manager');
-        $pageRepository = $em->getRepository('AppBundle:Page');
         $monitoringResourceClient = $this->getContainer()->get('app.client.monitoring_resource');
-        $monitoringResourceService = $this->getContainer()->get('app.monitroing_resource');
+        $monitoringResourceManager = $this->getContainer()->get('app.monitoring_resource.manager');
+        $monitoringResourceService = $this->getContainer()->get('app.monitoring_resource');
 
         for ($i = 0; $i < self::COUNT_DOCUMENT_PER_FAST_SCAN / self::COUNT_DOCUMENT_PER_PAGE; $i++) {
             try {
@@ -74,7 +72,7 @@ class MonitoringResourceCommand extends ContainerAwareCommand
                         $pageCrawler->filter('.otstupVertVneshn .bg1-content')->html()
                     );
 
-                    $page = $pageRepository->getPageByURL($url);
+                    $page = $monitoringResourceManager->getPageByURL($url);
                     $title = $document->nodeValue;
                     if ($page instanceof Page) {
                         $hash = $monitoringResourceService->generateHashContent($content);
@@ -88,7 +86,6 @@ class MonitoringResourceCommand extends ContainerAwareCommand
                     }
                 }
             }
-            $em->flush();
         }
     }
 }
