@@ -2,11 +2,11 @@
 
 namespace AppBundle\Repository;
 
-use Doctrine\ORM\EntityRepository;
+use Gedmo\Loggable\Entity\Repository\LogEntryRepository;
 
 /**
  * Log Repository
  */
-class LogRepository extends EntityRepository
+class LogRepository extends LogEntryRepository
 {
 }

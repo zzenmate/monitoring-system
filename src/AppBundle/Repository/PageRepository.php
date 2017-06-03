@@ -45,6 +45,7 @@ class PageRepository extends EntityRepository
             ->select('p2.id')
             ->setFirstResult(0)
             ->setMaxResults($countScannedPages)
+            ->orderBy('p2.id', 'ASC')
             ->getQuery()
             ->getResult();
 
