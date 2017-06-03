@@ -59,4 +59,18 @@ class PageRepository extends EntityRepository
                    ->getQuery()
                    ->getResult();
     }
+
+    /**
+     *  Get total number of pages
+     *
+     * @return int
+     */
+    public function getTotalNumberOfPages()
+    {
+        $qb = $this->createQueryBuilder('p');
+
+        return (int) $qb->select('count(p.id)')
+                        ->getQuery()
+                        ->getSingleScalarResult();
+    }
 }

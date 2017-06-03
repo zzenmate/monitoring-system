@@ -10,6 +10,7 @@ use Gedmo\SoftDeleteable\Traits\SoftDeleteableEntity;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
+use JMS\Serializer\Annotation as JMS;
 
 /**
  * Page Entity
@@ -21,6 +22,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @Gedmo\Loggable(logEntryClass="AppBundle\Entity\Log")
  * @Gedmo\SoftDeleteable(fieldName="deletedAt", timeAware=false)
+ *
+ * @JMS\ExclusionPolicy("all")
  */
 class Page
 {
@@ -32,6 +35,8 @@ class Page
      * @ORM\Id
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
+     *
+     * @JMS\Expose
      */
     protected $id;
 
@@ -42,6 +47,8 @@ class Page
      *
      * @Assert\NotBlank()
      * @Assert\Type(type="string")
+     *
+     * @JMS\Expose
      */
     protected $title;
 
@@ -54,6 +61,8 @@ class Page
      * @Assert\Type(type="string")
      *
      * @Gedmo\Versioned
+     *
+     * @JMS\Expose
      */
     protected $content;
 
@@ -65,6 +74,8 @@ class Page
      * @Assert\NotBlank()
      * @Assert\Length(min="2", max="255")
      * @Assert\Type(type="string")
+     *
+     * @JMS\Expose
      */
     protected $url;
 
@@ -74,6 +85,8 @@ class Page
      * @ORM\Column(type="datetime", nullable=true)
      *
      * @Assert\Type(type="datetime")
+     *
+     * @JMS\Expose
      */
     protected $scannedAt;
 
@@ -82,6 +95,8 @@ class Page
      *
      * @ORM\Column(name="status", type="PageStatusType", nullable=false)
      * @DoctrineAssert\Enum(entity="AppBundle\DBAL\Types\PageStatusType")
+     *
+     * @JMS\Expose
      */
     protected $status = PageStatusType::NEW_PAGE;
 
@@ -90,6 +105,8 @@ class Page
      *
      * @ORM\Column(type="integer")
      * @ORM\Version
+     *
+     * @JMS\Expose
      */
     protected $version;
 

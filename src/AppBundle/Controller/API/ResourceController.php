@@ -50,7 +50,7 @@ class ResourceController extends FOSRestController
 
             $view = $this->createViewForHttpOkResponse([
                 '_metadata' => [
-                    'total' => count($pages),
+                    'total' => $repository->getTotalNumberOfPages(),
                     '_limit' => (int) $filters['_limit'],
                     '_offset' => (int) $filters['_offset'],
                 ],
