@@ -60,7 +60,7 @@ class MonitoringResourceCommand extends ContainerAwareCommand
             try {
                 $listResponse = $monitoringResourceClient->get('', [
                     'query' => [
-                        'start' => 8850 + self::COUNT_DOCUMENT_PER_PAGE * $i,
+                        'start' => self::COUNT_DOCUMENT_PER_PAGE * $i,
                     ],
                 ]);
             } catch (MonitoringResourceBadResponseException $e) {
@@ -75,8 +75,7 @@ class MonitoringResourceCommand extends ContainerAwareCommand
 
             $listDocumentLinks = $listCrawler->filter('.otstupVertVneshn .bg1-content a');
 
-            $countDocuments = $listDocumentLinks->count()
-                              > 10 ? self::COUNT_DOCUMENT_PER_PAGE : $listDocumentLinks->count();
+            $countDocuments = $listDocumentLinks->count() > 10 ? self::COUNT_DOCUMENT_PER_PAGE : $listDocumentLinks->count();
 
             if ($countDocuments <= self::COUNT_DOCUMENT_ELEMENT_IN_EMPTY_PAGE) {
                 break;
