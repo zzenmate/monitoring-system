@@ -21,6 +21,7 @@ class AppExtension extends Extension
         $loader->load('services.yml');
         $loader->load('repositories.yml');
         $loader->load('managers.yml');
+        $loader->load('listeners.yml');
     }
 
     /**

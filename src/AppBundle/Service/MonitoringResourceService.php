@@ -2,6 +2,7 @@
 
 namespace AppBundle\Service;
 
+use AppBundle\DBAL\Types\PageStatusType;
 use AppBundle\Entity\Page;
 use AppBundle\Manager\MonitoringResourceManagerInterface;
 
@@ -58,6 +59,10 @@ class MonitoringResourceService
         if ($content != null && $hash != null) {
             $page->setContent($content)
                  ->setHash($content);
+        }
+
+        if ($page->getStatus() != PageStatusType::CHANGED_PAGE) {
+            $page->setStatus(PageStatusType::CHANGED_PAGE);
         }
 
         return $page;

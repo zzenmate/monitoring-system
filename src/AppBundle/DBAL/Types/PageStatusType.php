@@ -16,6 +16,6 @@ final class PageStatusType extends AbstractEnumType
     protected static $choices = [
         self::NEW_PAGE => 'New page',
         self::CHANGED_PAGE => 'Changed page',
-        self::CHANGED_PAGE => 'Deleted page',
+        self::DELETED_PAGE => 'Deleted page',
     ];
 }

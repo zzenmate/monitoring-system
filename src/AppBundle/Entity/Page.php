@@ -17,6 +17,7 @@ use JMS\Serializer\Annotation as JMS;
  *
  * @ORM\Table(name="pages")
  * @ORM\Entity(repositoryClass="AppBundle\Repository\PageRepository")
+ * @ORM\EntityListeners({"AppBundle\EntityListener\PageListener"})
  *
  * @UniqueEntity("url")
  *
@@ -249,7 +250,7 @@ class Page
     /**
      * Set status
      *
-     * @param PageStatusType $status Page status type
+     * @param string $status Page status type
      *
      * @return $this
      */
