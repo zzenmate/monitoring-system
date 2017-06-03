@@ -17,16 +17,21 @@ interface MonitoringResourceManagerInterface
     public function save(Page $page);
 
     /**
-     * Flush page
-     */
-    public function flush();
-
-    /**
      * Remove page
      *
      * @param Page $page Page
      */
     public function remove(Page $page);
+
+    /**
+     * Clear entity manager
+     */
+    public function clear();
+
+    /**
+     * Flush page
+     */
+    public function flush();
 
     /**
      * Get page by URL

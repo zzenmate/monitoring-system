@@ -51,13 +51,9 @@ class MonitoringResourceManager implements MonitoringResourceManagerInterface
     /**
      * @inheritdoc
      */
-    public function flush()
+    public function clear()
     {
-        try {
-            $this->em->flush();
-        } catch (OptimisticLockException $e) {
-            $this->logger->addError(sprintf("OptimisticLockException, message:\"%s\"", $e->getMessage()));
-        }
+        $this->em->clear();
     }
 
     /**
@@ -69,6 +65,19 @@ class MonitoringResourceManager implements MonitoringResourceManagerInterface
             $this->em->remove($page);
         } catch (OptimisticLockException $e) {
             $this->logger->addError(sprintf("OptimisticLockException for ID: %s, message:\"%s\"", $page->getID(), $e->getMessage()));
+        }
+    }
+
+
+    /**
+     * @inheritdoc
+     */
+    public function flush()
+    {
+        try {
+            $this->em->flush();
+        } catch (OptimisticLockException $e) {
+            $this->logger->addError(sprintf("OptimisticLockException, message:\"%s\"", $e->getMessage()));
         }
     }
 

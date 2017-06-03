@@ -6,14 +6,19 @@ use AppBundle\Entity\Page;
 use AppBundle\Exception\MonitoringResourceBadResponseException;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\Console\Exception\RuntimeException;
 
 class MonitoringResourceCommand extends ContainerAwareCommand
 {
     const COUNT_DOCUMENT_PER_PAGE = 10;
     const COUNT_DOCUMENT_PER_FAST_SCAN = 100;
     const COUNT_DOCUMENT_ELEMENT_IN_EMPTY_PAGE = 2;
+    const MAX_COUNT_SCAN_DOCUMENT = 100000;
+    const MODE_FAST = 'fast';
+    const MODE_FULL = 'full';
 
     /**
      * {@inheritdoc}
@@ -22,7 +27,8 @@ class MonitoringResourceCommand extends ContainerAwareCommand
     {
         $this
             ->setName('app:tools:monitoring-resource')
-            ->setDescription('Hello PhpStorm');
+            ->setDescription('Command for monitoring resource')
+            ->addOption('mode', null, InputOption::VALUE_REQUIRED, 'mode: fast or full', self::MODE_FAST);
     }
 
     /**
@@ -30,6 +36,12 @@ class MonitoringResourceCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $mode = $input->getOption('mode');
+        if ($mode != self::MODE_FAST && $mode != self::MODE_FULL) {
+            throw new RuntimeException(sprintf('Incorrect mode'));
+        }
+
+        $batchSize = 200;
         $countIteration = 0;
         $startScannedAt = (new \DateTime());
 
@@ -37,11 +49,18 @@ class MonitoringResourceCommand extends ContainerAwareCommand
         $monitoringResourceManager = $this->getContainer()->get('app.monitoring_resource.manager');
         $monitoringResourceService = $this->getContainer()->get('app.monitoring_resource');
 
-        for ($i = 0; $i < self::COUNT_DOCUMENT_PER_FAST_SCAN / self::COUNT_DOCUMENT_PER_PAGE; $i++) {
+        if ($mode == self::MODE_FAST) {
+            $countScanPage = self::COUNT_DOCUMENT_PER_FAST_SCAN / self::COUNT_DOCUMENT_PER_PAGE;
+        } else {
+            $countScanPage = self::MAX_COUNT_SCAN_DOCUMENT;
+        }
+
+        // if page does not have list with documents, "FOR" will be stop work
+        for ($i = 0; $i < $countScanPage; $i++) {
             try {
                 $listResponse = $monitoringResourceClient->get('', [
                     'query' => [
-                        'start' => self::COUNT_DOCUMENT_PER_PAGE * $i,
+                        'start' => 8850 + self::COUNT_DOCUMENT_PER_PAGE * $i,
                     ],
                 ]);
             } catch (MonitoringResourceBadResponseException $e) {
@@ -55,13 +74,15 @@ class MonitoringResourceCommand extends ContainerAwareCommand
             $listCrawler = new Crawler($listResponseContent);
 
             $listDocumentLinks = $listCrawler->filter('.otstupVertVneshn .bg1-content a');
-            $countDocuments = $listDocumentLinks->count() > 10 ? self::COUNT_DOCUMENT_PER_PAGE : $listDocumentLinks->count();
+
+            $countDocuments = $listDocumentLinks->count()
+                              > 10 ? self::COUNT_DOCUMENT_PER_PAGE : $listDocumentLinks->count();
 
             if ($countDocuments <= self::COUNT_DOCUMENT_ELEMENT_IN_EMPTY_PAGE) {
                 break;
             }
 
-            $listDocuments = $listDocumentLinks->slice(0, self::COUNT_DOCUMENT_PER_PAGE);
+            $listDocuments = $listDocumentLinks->slice(0, $countDocuments);
             /** @var \DOMElement $document */
             foreach ($listDocuments as $document) {
                 $countIteration++;
@@ -96,6 +117,11 @@ class MonitoringResourceCommand extends ContainerAwareCommand
                     } else {
                         $monitoringResourceService->savePage($title, $content, $url);
                     }
+                }
+
+                if (($i % $batchSize) == 0) {
+                    $monitoringResourceManager->flush();
+                    $monitoringResourceManager->clear();
                 }
             }
         }
