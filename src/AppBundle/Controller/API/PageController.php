@@ -4,12 +4,12 @@ namespace AppBundle\Controller\API;
 
 use AppBundle\Entity\Log;
 use AppBundle\Entity\Page;
-use AppBundle\Repository\LogRepository;
 use FOS\RestBundle\Controller\Annotations\View;
 use FOS\RestBundle\Controller\FOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcherInterface;
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
+use SebastianBergmann\Diff\Differ;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -146,6 +146,54 @@ class PageController extends FOSRestController
 
             $view = $this->createViewForHttpOkResponse([
                 'logs' => $logs,
+            ]);
+        } catch (\Exception $e) {
+            throw $this->createInternalServerErrorException();
+        }
+
+        return $this->handleView($view);
+    }
+
+    /**
+     * Повертає різницю між версію публікацій
+     *
+     * @param Page    $page        $page
+     * @param integer $oldRevision Old revision
+     * @param integer $newRevision New revision
+     *
+     * @return Response
+     *
+     * @ApiDoc(
+     *     description="Повертає різницю між версіями публікацій",
+     *     requirements={
+     *          {"name"="id", "dataType"="integer", "description"="ID of page"},
+     *          {"name"="oldRevision", "dataType"="integer", "description"="Number of old revision"},
+     *          {"name"="newRevision", "dataType"="integer", "description"="Number of new revision"}
+     *      },
+     *     section="Page",
+     *     output={
+     *          "class"="AppBundle\Entity\Log",
+     *     },
+     *     statusCodes={
+     *          200="Returned when successful",
+     *          404="Returned when page not found",
+     *          500="Returned when internal error on the server occurred"
+     *      }
+     * )
+     *
+     * @Rest\Get("/{id}/revision/diff/{oldRevision}/{newRevision}")
+     */
+    public function diffAction(Page $page, $oldRevision, $newRevision)
+    {
+        $logRepository = $this->getDoctrine()->getRepository(Log::class);
+        try {
+            $pageOldRevision = $logRepository->findRevisionByPageAndVersion($page, $oldRevision);
+            $pageNewRevision = $logRepository->findRevisionByPageAndVersion($page, $newRevision);
+
+            $differ = new Differ();
+
+            $view = $this->createViewForHttpOkResponse([
+                'changes' => $differ->diff($pageOldRevision->getData()['content'], $pageNewRevision->getData()['content']),
             ]);
         } catch (\Exception $e) {
             throw $this->createInternalServerErrorException();

@@ -32,4 +32,30 @@ class LogRepository extends LogEntryRepository
                   ->getQuery()
                   ->getResult();
     }
+
+    /**
+     * Find revision by page and version
+     *
+     * @param Page $page    Page
+     * @param int  $version Version
+     *
+     * @return Log
+     */
+    public function findRevisionByPageAndVersion(Page $page, $version)
+    {
+        $qb = $this->createQueryBuilder('p');
+
+        return $qb->where($qb->expr()->eq('p.objectId', ':page'))
+                  ->andWhere($qb->expr()->neq('p.action', ':not_equal_action'))
+                  ->andWhere($qb->expr()->eq('p.version', ':version'))
+                  ->setParameters([
+                      'page' => $page,
+                      'not_equal_action' => 'remove',
+                      'version' => $version,
+
+                  ])
+                  ->orderBy('p.id', 'ASC')
+                  ->getQuery()
+                  ->getSingleResult();
+    }
 }
