@@ -5,9 +5,9 @@ namespace AppBundle\Manager;
 use AppBundle\Entity\Page;
 
 /**
- * Interface MonitoringResourceManagerInterface
+ * Interface PageManagerInterface
  */
-interface MonitoringResourceManagerInterface
+interface PageManagerInterface
 {
     /**
      * Save page

@@ -46,7 +46,7 @@ class MonitoringResourceCommand extends ContainerAwareCommand
         $startScannedAt = (new \DateTime());
 
         $monitoringResourceClient = $this->getContainer()->get('app.client.monitoring_resource');
-        $monitoringResourceManager = $this->getContainer()->get('app.monitoring_resource.manager');
+        $pageManager = $this->getContainer()->get('app.page.manager');
         $monitoringResourceService = $this->getContainer()->get('app.monitoring_resource');
 
         if ($mode == self::MODE_FAST) {
@@ -87,7 +87,6 @@ class MonitoringResourceCommand extends ContainerAwareCommand
                 $countIteration++;
 
                 $url = $document->getAttribute('href');
-                echo $url.PHP_EOL;
                 if (!empty($url) && strpos($url, '.html') !== false) { // check if link to content page
                     try {
                         $pageResponse = $monitoringResourceClient->get($url);
@@ -104,7 +103,7 @@ class MonitoringResourceCommand extends ContainerAwareCommand
                         $pageCrawler->filter('.otstupVertVneshn .bg1-content')->html()
                     );
 
-                    $page = $monitoringResourceManager->getPageByURL($url);
+                    $page = $pageManager->getPageByURL($url);
                     $title = $document->nodeValue;
                     if ($page instanceof Page) {
                         $hash = $monitoringResourceService->generateHashContent($content);
@@ -119,13 +118,13 @@ class MonitoringResourceCommand extends ContainerAwareCommand
                 }
 
                 if (($i % $batchSize) == 0) {
-                    $monitoringResourceManager->flush();
-                    $monitoringResourceManager->clear();
+                    $pageManager->flush();
+                    $pageManager->clear();
                 }
             }
         }
 
-        $monitoringResourceManager->flush();
+        $pageManager->flush();
 
         $monitoringResourceService->removeNotScannedPages($countIteration, $startScannedAt);
     }

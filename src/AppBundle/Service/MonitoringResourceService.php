@@ -4,22 +4,22 @@ namespace AppBundle\Service;
 
 use AppBundle\DBAL\Types\PageStatusType;
 use AppBundle\Entity\Page;
-use AppBundle\Manager\MonitoringResourceManagerInterface;
+use AppBundle\Manager\PageManagerInterface;
 
 /**
  * Class MonitoringResourceService
  */
 class MonitoringResourceService
 {
-    /** @var MonitoringResourceManagerInterface $monitoringResourceManager Monitoring resource manager */
+    /** @var PageManagerInterface $monitoringResourceManager Monitoring resource manager */
     protected $monitoringResourceManager;
 
     /**
      * Constructor
      *
-     * @param MonitoringResourceManagerInterface $monitoringResourceManager Monitoring resource manager
+     * @param PageManagerInterface $monitoringResourceManager Monitoring resource manager
      */
-    public function __construct(MonitoringResourceManagerInterface $monitoringResourceManager)
+    public function __construct(PageManagerInterface $monitoringResourceManager)
     {
         $this->monitoringResourceManager = $monitoringResourceManager;
     }

@@ -36,7 +36,7 @@ class PageListener
         if ($page instanceof Page) {
             $page->setStatus(PageStatusType::DELETED_PAGE);
 
-            $this->container->get('app.monitoring_resource.manager')->flush();
+            $this->container->get('app.page.manager')->flush();
         }
     }
 }

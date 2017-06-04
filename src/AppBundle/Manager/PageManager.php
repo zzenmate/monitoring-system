@@ -9,9 +9,9 @@ use Doctrine\ORM\OptimisticLockException;
 use Monolog\Logger;
 
 /**
- * Class MonitoringResourceManager
+ * Class PageManager
  */
-class MonitoringResourceManager implements MonitoringResourceManagerInterface
+class PageManager implements PageManagerInterface
 {
     /** @var EntityManager $em Entity manager */
     protected $em;

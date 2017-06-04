@@ -1,6 +1,6 @@
 services:
-    app.monitoring_resource.manager:
-        class: AppBundle\Manager\MonitoringResourceManager
+    app.page.manager:
+        class: AppBundle\Manager\PageManager
         arguments:
             - "@doctrine.orm.entity_manager"
             - "@page.repository"

@@ -12,4 +12,4 @@ services:
     app.monitoring_resource:
         class: AppBundle\Service\MonitoringResourceService
         arguments:
-            - "@app.monitoring_resource.manager"
+            - "@app.page.manager"
